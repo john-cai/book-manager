@@ -1,12 +1,22 @@
 package responder
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 )
 
 type ErrorResponse struct {
 	Errors []Error `json:"errors"`
+}
+
+func (e ErrorResponse) Error() string {
+	var b bytes.Buffer
+	for _, err := range e.Errors {
+		b.WriteString(fmt.Sprintf("message: %v, field: %v", err.Message, err.Field))
+	}
+	return b.String()
 }
 
 type Error struct {
@@ -19,7 +29,7 @@ func Respond(w http.ResponseWriter, httpStatus int) error {
 	return nil
 }
 
-func RespondSingle(w http.ResponseWriter, i interface{}, httpStatus int) error {
+func RespondResult(w http.ResponseWriter, i interface{}, httpStatus int) error {
 	w.WriteHeader(httpStatus)
 	return json.NewEncoder(w).Encode(i)
 }
@@ -40,8 +50,4 @@ func RespondErrors(w http.ResponseWriter, errors []Error, httpStatus int) error 
 	return json.NewEncoder(w).Encode(&ErrorResponse{
 		Errors: errors,
 	})
-}
-
-func RespondMultiple(w http.ResponseWriter, i interface{}) {
-
 }

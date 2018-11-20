@@ -36,11 +36,13 @@ func NewServer() *Server {
 
 func (s *Server) configureRoutes() {
 	s.HandleFunc("/books", s.AddBook).Methods("POST")
+	s.HandleFunc("/books", s.ViewBooks).Methods("GET")
 	s.HandleFunc("/books/{isbn}", s.ViewBook).Methods("GET")
 	s.HandleFunc("/books/{isbn}", s.EditBook).Methods("PUT")
 	s.HandleFunc("/books/{isbn}", s.RemoveBook).Methods("DELETE")
 
 	s.HandleFunc("/collections", s.AddCollection).Methods("POST")
+	s.HandleFunc("/collections", s.ViewCollections).Methods("GET")
 	s.HandleFunc("/collections/{collection_id}", s.ViewCollection).Methods("GET")
 	s.HandleFunc("/collections/{collection_id}", s.EditCollection).Methods("PUT")
 	s.HandleFunc("/collections/{collection_id}", s.RemoveCollection).Methods("DELETE")

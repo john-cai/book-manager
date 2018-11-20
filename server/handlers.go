@@ -28,15 +28,23 @@ func (s *Server) AddBook(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
+	// check if the isbn is already in our system
+	if _, err := s.database.GetBookByISBN(book.ISBN); err == nil {
+		if err = responder.RespondErrors(w, []responder.Error{responder.Error{Message: "this isbn already exists", Field: "isbn"}}, http.StatusBadRequest); err != nil {
+			log.Errorf("error when responding with 400 error: %v", err)
+		}
+		return
+	}
 
 	if err = s.database.AddBook(&book); err != nil {
+		log.Errorf("error when adding book: %v", err)
 		if err = responder.RespondError(w, "something went wrong", "", http.StatusInternalServerError); err != nil {
 			log.Errorf("error when responding with 500 error %v", err)
 		}
 		return
 	}
 
-	if err = responder.RespondSingle(w, &book, http.StatusCreated); err != nil {
+	if err = responder.RespondResult(w, &book, http.StatusCreated); err != nil {
 		log.Errorf("error when responding with 201 error %v", err)
 	}
 }
@@ -59,7 +67,38 @@ func (s *Server) ViewBook(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	if err = responder.RespondSingle(w, &book, http.StatusOK); err != nil {
+	if err = responder.RespondResult(w, &book, http.StatusOK); err != nil {
+		log.Errorf("error when responding with 200 error: ", err)
+	}
+}
+
+func (s *Server) ViewBooks(w http.ResponseWriter, r *http.Request) {
+	var err error
+
+	var books []models.Book
+	var published int
+	if r.FormValue("published") != "" {
+		published, err = strconv.Atoi(r.FormValue("published"))
+		if err != nil {
+			if err = responder.RespondErrors(w, []responder.Error{responder.Error{Field: "published", Message: "not a valid year"}}, http.StatusBadRequest); err != nil {
+				log.Errorf("error when responding with 400 error: %v", err)
+			}
+			return
+		}
+	}
+	if books, err = s.database.GetBooks(
+		r.FormValue("isbn"),
+		r.FormValue("title"),
+		r.FormValue("author"),
+		published,
+		[]string{},
+	); err != nil {
+		if err = responder.RespondError(w, "something went wrong", "", http.StatusInternalServerError); err != nil {
+			log.Errorf("error when responding with 500 error: %v", err)
+		}
+		return
+	}
+	if err = responder.RespondResult(w, &books, http.StatusOK); err != nil {
 		log.Errorf("error when responding with 200 error: ", err)
 	}
 }
@@ -99,7 +138,7 @@ func (s *Server) EditBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err = responder.RespondSingle(w, &book, http.StatusOK); err != nil {
+	if err = responder.RespondResult(w, &book, http.StatusOK); err != nil {
 		log.Errorf("error when responding with 201 error %v", err)
 	}
 }
@@ -151,7 +190,7 @@ func (s *Server) AddCollection(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err = responder.RespondSingle(w, &collection, http.StatusCreated); err != nil {
+	if err = responder.RespondResult(w, &collection, http.StatusCreated); err != nil {
 		log.Errorf("error when responding with 201 error %v", err)
 	}
 
@@ -181,7 +220,23 @@ func (s *Server) ViewCollection(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err = responder.RespondSingle(w, &collection, http.StatusOK); err != nil {
+	if err = responder.RespondResult(w, &collection, http.StatusOK); err != nil {
+		log.Errorf("error when responding with 200 error: ", err)
+	}
+}
+
+func (s *Server) ViewCollections(w http.ResponseWriter, r *http.Request) {
+	var err error
+	//TODO: support being able to filter by book criteria
+	var collections []models.Collection
+	if collections, err = s.database.GetAllCollections(); err != nil {
+		if err = responder.RespondError(w, "something went wrong", "", http.StatusInternalServerError); err != nil {
+			log.Errorf("error when responding with 500 error: %v", err)
+		}
+		return
+	}
+
+	if err = responder.RespondResult(w, &collections, http.StatusOK); err != nil {
 		log.Errorf("error when responding with 200 error: ", err)
 	}
 }
@@ -220,7 +275,7 @@ func (s *Server) EditCollection(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err = responder.RespondSingle(w, &collection, http.StatusCreated); err != nil {
+	if err = responder.RespondResult(w, &collection, http.StatusCreated); err != nil {
 		log.Errorf("error when responding with 201 error %v", err)
 	}
 }
