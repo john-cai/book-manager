@@ -4,24 +4,23 @@
 
 `Usage: bm [COMMAND]... [OPTIONS]...`
 
-| Command            | Arguments            | Options                                                                                               | Output                                                    | Error                                    |
-|--------------------|----------------------|-------------------------------------------------------------------------------------------------------|-----------------------------------------------------------|------------------------------------------|
-| add book           | -isbn -title -author | -published -description -genre                                                                        | book <title> successfully added                           | - if isbn already exists                 |
-| edit book          | -isbn                | -title  -author -published -description -genre                                                        | book <title> successfully updated                         | - if isbn does not exist                 |
-| remove books       |                      | -isbn -title  -author -published -description -genre                                                  | <# of books> successfully removed                         |                                          |
-| detail book        | -isbn                |                                                                                                       | <book details>                                            | - if isbn does not exist                 |
-| add collection     | -name                |  -collection-description-books (comma separated isbns)                                                | collection <name> successfully added with id <id>         | - if collection already exists           |
-| view collection    | -id                  |                                                                                                       | <collection details with a table of books>                | - if collection id does not exist        |
-| edit collection    | -id                  | -remove-books (comma separated list of isbns) -add-books (comma separated list of isbns) -description | collection <name> successfully updated                    | - if collection id does not exist        |
-| remove collection  | -id                  |                                                                                                       | collection <name> successfully removed                    | if collection with name does not exist   |
-| detail collection  | -name                |                                                                                                       | <collection detail with table of books>                   | - if collection with name does not exist |
-| search books       |                      | -isbn -title  -author -published -description -genre                                                  | <list of books with isbn, title, author, published date>  | - if no search options are provided      |
-| search collections |                      | -name -isbn -title -author -published -description -genre                                             | <list of collections with name, # of books>               | - if no search options are provided      |
-
+| Command            	| Arguments            	| Options                                                                                               	| Output                                                    	| Error                                    	|
+|--------------------	|----------------------	|-------------------------------------------------------------------------------------------------------	|-----------------------------------------------------------	|------------------------------------------	|
+| add book           	| -isbn -title -author 	| -published -description -genre                                                                        	| book [title] successfully added                           	| - if isbn already exists                 	|
+| edit book          	| -isbn                	| -title  -author -published -description -genre                                                        	| book [title] successfully updated                         	| - if isbn does not exist                 	|
+| remove books       	|                      	| -isbn -title  -author -published -description -genre                                                  	| [# of books] successfully removed                         	|                                          	|
+| detail book        	| -isbn                	|                                                                                                       	| [book details]                                            	| - if isbn does not exist                 	|
+| add collection     	| -name                	|  -collection-description-books (comma separated isbns)                                                	| collection [name] successfully added with id [id]         	| - if collection already exists           	|
+| view collection    	| -id                  	|                                                                                                       	| [collection details with a table of books]                	| - if collection id does not exist        	|
+| edit collection    	| -id                  	| -remove-books (comma separated list of isbns) -add-books (comma separated list of isbns) -description 	| collection [name] successfully updated                    	| - if collection id does not exist        	|
+| remove collection  	| -id                  	|                                                                                                       	| collection [name] successfully removed                    	| if collection with name does not exist   	|
+| detail collection  	| -name                	|                                                                                                       	| [collection detail with table of books]                   	| - if collection with name does not exist 	|
+| search books       	|                      	| -isbn -title  -author -published -description -genre                                                  	| [list of books with isbn, title, author, published date]  	| - if no search options are provided      	|
+| search collections 	|                      	| -name -isbn -title -author -published -description -genre                                             	| [list of collections with name, # of books]               	| - if no search options are provided      	|
 
 ## Book Manager REST API
 ### Books
-`HTTP POST /api/books/add`
+`HTTP POST /api/books`
 ```
 [payload]
 {
@@ -86,7 +85,7 @@
 {"message":"author cannot be blank","field":"author"}
 ```
 
-`HTTP GET /api/books/search?output=&title=&author=miller&description=pineapples&published_date=1988&genres=a,b,c`
+`HTTP GET /api/books?output=&title=&author=miller&description=pineapples&published_date=1988&genres=a,b,c`
 ```
 [response]
 200 OK
@@ -110,6 +109,25 @@
 ```
 
 ### Collections
+
+`HTTP GET /api/v1/collections`
+```
+[payload]
+[
+    {
+       "name":"",
+       "description":"",
+       "books":[]
+    },
+    {
+       "name":"",
+       "description":"",
+       "books":[]
+    }...
+]
+[response]
+200 OK
+```
 
 `HTTP POST /api/v1/collections`
 ```
